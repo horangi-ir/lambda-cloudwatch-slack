@@ -152,6 +152,7 @@ var handleCodePipeline = function(event, context) {
   var fields = [];
   var color = "warning";
   var changeType = "";
+  var channelAlert = "";
 
   try {
     message = JSON.parse(event.Records[0].Sns.Message);
@@ -169,9 +170,10 @@ var handleCodePipeline = function(event, context) {
       color = "good";
     } else if(message.detail.state === "FAILED"){
       color = "danger";
+      channelAlert = "<!channel>";
     }
     header = message.detail.state + ": CodePipeline " + changeType;
-    fields.push({ "title": "Message", "value": header, "short": false });
+    fields.push({ "title": "Message", "value": header + " " + channelAlert, "short": false });
     fields.push({ "title": "Pipeline", "value": message.detail.pipeline, "short": true });
     fields.push({ "title": "Region", "value": message.region, "short": true });
     fields.push({
