@@ -1,0 +1,18 @@
+{
+  "Records": [
+    {
+      "EventSource": "aws:sns",
+      "EventVersion": "1.0",
+      "EventSubscriptionArn": "arn:aws:sns:us-east-1:123456789123:codebuild-alerts:00000000-0000-0000-0000-000000000000",
+      "Sns": {
+        "Type": "Notification",
+        "MessageId": "00000000-0000-0000-0000-000000000000",
+        "TopicArn": "arn:aws:sns:us-east-1:123456789:codebuild-alerts",
+        "Subject": null,
+        "Message": "{\"version\":\"0\",\"id\":\"00000000-0000-0000-0000-000000000000\",\"detail-type\":\"CodeBuild Build State Change\",\"source\":\"aws.codebuild\",\"account\":\"123456789123\",\"time\":\"2018-02-14T07:14:14Z\",\"region\":\"us-east-1\",\"resources\":[\"arn:aws:codebuild:us-east-1:123456789123:build/aCodebuildProject:6bdced96-e528-485b-a64c-10df867f5f33\"],\"detail\":{\"project-name\":\"aCodebuildProject\",\"build-status\": \"SUCCEEDED\",\"build-id\":\"arn:aws:codebuild:us-east-1:123456789123:build/aCodebuildProject:6bdced96-e528-485b-a64c-10df867f5f33\",\"version\":1.0}}",
+        "Timestamp": "2018-02-14T07:14:27.208Z",
+        "MessageAttributes": {}
+      }
+    }
+  ]
+}

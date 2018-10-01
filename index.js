@@ -144,6 +144,60 @@ var handleCodeDeploy = function(event, context) {
   return _.merge(slackMessage, baseSlackMessage);
 };
 
+var handleCodeBuild = function(event, context) {
+  var subject = "AWS CodeBuild Notification";
+  var timestamp = (new Date(event.Records[0].Sns.Timestamp)).getTime()/1000;
+  var snsSubject = event.Records[0].Sns.Subject;
+  var message;
+  var fields = [];
+  var color = "warning";
+  var channelAlert = "";
+
+  try {
+    message = JSON.parse(event.Records[0].Sns.Message);
+    detailType = message['detail-type'];
+    var buildId = message.detail["build-id"].split(/[\/]+/);
+    var buildSuffix = buildId[buildId.length-1];
+
+    if(message.detail["build-status"] === "SUCCEEDED"){
+      color = "good";
+    } else if(message.detail["build-status"] === "FAILED"){
+      color = "danger";
+      channelAlert = "<!channel>";
+    }
+    header = message.detail["build-status"] + ": CodeBuild";
+    fields.push({ "title": "Message", "value": header + " " + channelAlert, "short": false });
+    fields.push({ "title": "Project", "value": message.detail["project-name"], "short": true });
+    fields.push({ "title": "Region", "value": message.region, "short": true });
+    fields.push({
+      "title": "Status Link",
+      "value": "https://console.aws.amazon.com/codebuild/home?region=" + message.region + "#/builds/" + buildSuffix + "/view/new",
+      "short": false
+    });
+  }
+  catch(e) {
+    color = "good";
+    message = event.Records[0].Sns.Message;
+    header = message.detail["build-status"] + ": CodeBuild " + message.detail["project-name"];
+    fields.push({ "title": "Message", "value": header, "short": false });
+    fields.push({ "title": "Detail", "value": message, "short": false });
+  }
+
+
+  var slackMessage = {
+    text: "*" + subject + "*",
+    attachments: [
+      {
+        "color": color,
+        "fields": fields,
+        "ts": timestamp
+      }
+    ]
+  };
+
+  return _.merge(slackMessage, baseSlackMessage);
+};
+
 var handleCodePipeline = function(event, context) {
   var subject = "AWS CodePipeline Notification";
   var timestamp = (new Date(event.Records[0].Sns.Timestamp)).getTime()/1000;
@@ -372,7 +426,11 @@ var processEvent = function(event, context) {
   var eventSnsSubject = event.Records[0].Sns.Subject || 'no subject';
   var eventSnsMessage = event.Records[0].Sns.Message;
 
-  if(eventSubscriptionArn.indexOf(config.services.codepipeline.match_text) > -1 || eventSnsSubject.indexOf(config.services.codepipeline.match_text) > -1 || eventSnsMessage.indexOf(config.services.codepipeline.match_text) > -1){
+  if(eventSubscriptionArn.indexOf(config.services.codebuild.match_text) > -1 || eventSnsSubject.indexOf(config.services.codebuild.match_text) > -1 || eventSnsMessage.indexOf(config.services.codebuild.match_text) > -1){
+    console.log("processing codebuild notification");
+    slackMessage = handleCodeBuild(event,context)
+  }
+  else if(eventSubscriptionArn.indexOf(config.services.codepipeline.match_text) > -1 || eventSnsSubject.indexOf(config.services.codepipeline.match_text) > -1 || eventSnsMessage.indexOf(config.services.codepipeline.match_text) > -1){
     console.log("processing codepipeline notification");
     slackMessage = handleCodePipeline(event,context)
   }
